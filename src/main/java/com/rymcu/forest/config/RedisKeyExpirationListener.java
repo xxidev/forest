@@ -1,6 +1,7 @@
 package com.rymcu.forest.config;
 
 import com.rymcu.forest.auth.JwtConstants;
+import com.rymcu.forest.service.AccountService;
 import com.rymcu.forest.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,8 @@ public class RedisKeyExpirationListener extends KeyExpirationEventMessageListene
 
     @Resource
     private UserService userService;
-
+    @Resource
+    private AccountService accountService;
     @Autowired
     public RedisKeyExpirationListener(RedisMessageListenerContainer listenerContainer) {
         super(listenerContainer);
@@ -45,7 +47,7 @@ public class RedisKeyExpirationListener extends KeyExpirationEventMessageListene
             String account = expiredKey.replace(JwtConstants.LAST_ONLINE, "");
             log.info("拿到过期的数据：{}", expiredKey);
             log.info("处理后的数据：{}", account);
-            userService.updateLastOnlineTimeByAccount(account);
+            accountService.updateLastOnlineTimeByAccount(account);
         }
         super.onMessage(message, pattern);
     }

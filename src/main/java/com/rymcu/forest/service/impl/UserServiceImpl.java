@@ -51,16 +51,11 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
     private TokenManager tokenManager;
     @Resource
     private UserExtendMapper userExtendMapper;
-    @Resource
-    private LoginRecordService loginRecordService;
+
 
     private final static String AVATAR_SVG_TYPE = "1";
     private final static String DEFAULT_AVATAR = "https://static.rymcu.com/article/1578475481946.png";
 
-    @Override
-    public User findByAccount(String account) throws TooManyResultsException {
-        return userMapper.selectByAccount(account);
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -116,30 +111,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
             return checkNickname(stringBuilder.append("_").append(System.currentTimeMillis()).toString());
         }
         return account;
-    }
-
-    @Override
-    public TokenUser login(String account, String password) {
-        User user = userMapper.selectByAccount(account);
-        if (user != null) {
-            if (Utils.comparePwd(password, user.getPassword())) {
-                userMapper.updateLastLoginTime(user.getIdUser());
-                userMapper.updateLastOnlineTimeByAccount(user.getAccount());
-                TokenUser tokenUser = new TokenUser();
-                tokenUser.setToken(tokenManager.createToken(user.getAccount()));
-                tokenUser.setRefreshToken(UlidCreator.getUlid().toString());
-                redisTemplate.boundValueOps(tokenUser.getRefreshToken()).set(account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
-                // 保存登录日志
-                loginRecordService.saveLoginRecord(user.getIdUser());
-                return tokenUser;
-            }
-        }
-        throw new AccountException();
-    }
-
-    @Override
-    public UserDTO findUserDTOByAccount(String account) {
-        return userMapper.selectUserDTOByAccount(account);
     }
 
     @Override
@@ -242,10 +213,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         return userExtend;
     }
 
-    @Override
-    public UserExtend selectUserExtendByAccount(String account) {
-        return userExtendMapper.selectUserExtendByAccount(account);
-    }
 
     @Override
     public boolean updateEmail(ChangeEmailDTO changeEmailDTO) throws ServiceException {
@@ -287,10 +254,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         return 1;
     }
 
-    @Override
-    public Integer updateLastOnlineTimeByAccount(String account) {
-        return userMapper.updateLastOnlineTimeByAccount(account);
-    }
 
     @Override
     public UserExtend findUserExtendInfo(Long idUser) {
@@ -331,10 +294,5 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         }
         permissions.add("user");
         return permissions;
-    }
-
-    @Override
-    public boolean hasAdminPermission(String account) {
-        return userMapper.hasAdminPermission(account);
     }
 }

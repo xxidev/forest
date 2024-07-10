@@ -9,10 +9,7 @@ import com.rymcu.forest.dto.ArticleDTO;
 import com.rymcu.forest.dto.PortfolioDTO;
 import com.rymcu.forest.dto.UserDTO;
 import com.rymcu.forest.entity.UserExtend;
-import com.rymcu.forest.service.ArticleService;
-import com.rymcu.forest.service.FollowService;
-import com.rymcu.forest.service.PortfolioService;
-import com.rymcu.forest.service.UserService;
+import com.rymcu.forest.service.*;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -28,6 +25,8 @@ public class UserController {
     @Resource
     private UserService userService;
     @Resource
+    private AccountService accountService;
+    @Resource
     private ArticleService articleService;
     @Resource
     private PortfolioService portfolioService;
@@ -37,13 +36,13 @@ public class UserController {
     @GetMapping("/{account}")
     @VisitLogger
     public GlobalResult<UserDTO> detail(@PathVariable String account) {
-        UserDTO userDTO = userService.findUserDTOByAccount(account);
+        UserDTO userDTO = accountService.findUserDTOByAccount(account);
         return GlobalResultGenerator.genSuccessResult(userDTO);
     }
 
     @GetMapping("/{account}/articles")
     public GlobalResult<PageInfo<ArticleDTO>> userArticles(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "12") Integer rows, @PathVariable String account) {
-        UserDTO userDTO = userService.findUserDTOByAccount(account);
+        UserDTO userDTO = accountService.findUserDTOByAccount(account);
         if (userDTO == null) {
             return GlobalResultGenerator.genErrorResult("用户不存在！");
         }
@@ -55,7 +54,7 @@ public class UserController {
 
     @GetMapping("/{account}/portfolios")
     public GlobalResult<PageInfo<PortfolioDTO>> userPortfolios(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "12") Integer rows, @PathVariable String account) {
-        UserDTO userDTO = userService.findUserDTOByAccount(account);
+        UserDTO userDTO = accountService.findUserDTOByAccount(account);
         if (userDTO == null) {
             return GlobalResultGenerator.genErrorResult("用户不存在！");
         }
@@ -67,7 +66,7 @@ public class UserController {
 
     @GetMapping("/{account}/followers")
     public GlobalResult<PageInfo<UserDTO>> userFollowers(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "12") Integer rows, @PathVariable String account) {
-        UserDTO userDTO = userService.findUserDTOByAccount(account);
+        UserDTO userDTO = accountService.findUserDTOByAccount(account);
         if (userDTO == null) {
             return GlobalResultGenerator.genErrorResult("用户不存在！");
         }
@@ -79,7 +78,7 @@ public class UserController {
 
     @GetMapping("/{account}/followings")
     public GlobalResult<PageInfo<UserDTO>> userFollowings(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "12") Integer rows, @PathVariable String account) {
-        UserDTO userDTO = userService.findUserDTOByAccount(account);
+        UserDTO userDTO = accountService.findUserDTOByAccount(account);
         if (userDTO == null) {
             return GlobalResultGenerator.genErrorResult("用户不存在！");
         }
@@ -91,7 +90,7 @@ public class UserController {
 
     @GetMapping("/{account}/user-extend")
     public GlobalResult<UserExtend> userExtend(@PathVariable String account) {
-        UserExtend userExtend = userService.selectUserExtendByAccount(account);
+        UserExtend userExtend = accountService.selectUserExtendByAccount(account);
         return GlobalResultGenerator.genSuccessResult(userExtend);
     }
 

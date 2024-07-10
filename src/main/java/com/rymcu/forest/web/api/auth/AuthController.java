@@ -7,6 +7,7 @@ import com.rymcu.forest.core.result.GlobalResultGenerator;
 import com.rymcu.forest.dto.BankAccountDTO;
 import com.rymcu.forest.dto.TokenUser;
 import com.rymcu.forest.entity.User;
+import com.rymcu.forest.service.AccountService;
 import com.rymcu.forest.service.BankAccountService;
 import com.rymcu.forest.service.UserService;
 import com.rymcu.forest.util.BeanCopierUtil;
@@ -26,13 +27,15 @@ public class AuthController {
     @Resource
     private UserService userService;
     @Resource
+    private AccountService accountService;
+    @Resource
     TokenManager tokenManager;
     @Resource
     private BankAccountService bankAccountService;
 
     @PostMapping("/login")
     public GlobalResult<TokenUser> login(@RequestBody User user) {
-        TokenUser tokenUser = userService.login(user.getAccount(), user.getPassword());
+        TokenUser tokenUser = accountService.login(user.getAccount(), user.getPassword());
         return GlobalResultGenerator.genSuccessResult(tokenUser);
     }
 

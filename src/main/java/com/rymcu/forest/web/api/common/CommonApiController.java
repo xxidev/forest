@@ -31,6 +31,7 @@ public class CommonApiController {
     private JavaMailService javaMailService;
     @Resource
     private UserService userService;
+    @Resource AccountService accountService;
     @Resource
     private ArticleService articleService;
     @Resource
@@ -42,7 +43,7 @@ public class CommonApiController {
     public GlobalResult<Map<String, String>> getEmailCode(@RequestParam("email") String email) throws MessagingException {
         Map<String, String> map = new HashMap<>(1);
         map.put("message", GlobalResultMessage.SEND_SUCCESS.getMessage());
-        User user = userService.findByAccount(email);
+        User user = accountService.findByAccount(email);
         if (user != null) {
             throw new AccountExistsException("该邮箱已被注册!");
         } else {
@@ -56,7 +57,7 @@ public class CommonApiController {
 
     @GetMapping("/get-forget-password-email")
     public GlobalResult getForgetPasswordEmail(@RequestParam("email") String email) throws MessagingException, ServiceException {
-        User user = userService.findByAccount(email);
+        User user = accountService.findByAccount(email);
         if (user != null) {
             Integer result = javaMailService.sendForgetPasswordEmail(email);
             if (result == 0) {
@@ -76,7 +77,7 @@ public class CommonApiController {
 
     @PostMapping("/login")
     public GlobalResult<TokenUser> login(@RequestBody User user) throws ServiceException {
-        TokenUser tokenUser = userService.login(user.getAccount(), user.getPassword());
+        TokenUser tokenUser = accountService.login(user.getAccount(), user.getPassword());
         return GlobalResultGenerator.genSuccessResult(tokenUser);
     }
 

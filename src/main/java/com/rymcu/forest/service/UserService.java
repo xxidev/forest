@@ -18,15 +18,6 @@ import java.util.Set;
 public interface UserService extends Service<User> {
 
     /**
-     * 通过账号查询用户信息
-     *
-     * @param account
-     * @return User
-     * @throws TooManyResultsException
-     */
-    User findByAccount(String account) throws TooManyResultsException;
-
-    /**
      * 注册接口
      *
      * @param email    邮箱
@@ -35,23 +26,6 @@ public interface UserService extends Service<User> {
      * @return Map
      */
     boolean register(String email, String password, String code);
-
-    /**
-     * 登录接口
-     *
-     * @param account  邮箱
-     * @param password 密码
-     * @return Map
-     */
-    TokenUser login(String account, String password);
-
-    /**
-     * 通过 account 获取用户信息接口
-     *
-     * @param account 昵称
-     * @return UserDTO
-     */
-    UserDTO findUserDTOByAccount(String account);
 
     /**
      * 找回密码接口
@@ -133,13 +107,7 @@ public interface UserService extends Service<User> {
      */
     UserExtend updateUserExtend(UserExtend userExtend) throws ServiceException;
 
-    /**
-     * 获取用户扩展信息
-     *
-     * @param account
-     * @return
-     */
-    UserExtend selectUserExtendByAccount(String account);
+
 
     /**
      * 更换邮箱
@@ -167,14 +135,6 @@ public interface UserService extends Service<User> {
     List<UserInfoDTO> findUsers(UserSearchDTO searchDTO);
 
     /**
-     * 通过邮箱更新用户最后登录时间
-     *
-     * @param account
-     * @return
-     */
-    Integer updateLastOnlineTimeByAccount(String account);
-
-    /**
      * 查询用户扩展信息
      *
      * @param idUser
@@ -198,5 +158,4 @@ public interface UserService extends Service<User> {
      */
     Set<String> findUserPermissions(User user);
 
-    boolean hasAdminPermission(String account);
 }

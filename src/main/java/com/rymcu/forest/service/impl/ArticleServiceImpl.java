@@ -47,6 +47,8 @@ public class ArticleServiceImpl extends AbstractService<Article> implements Arti
     @Resource
     private UserService userService;
     @Resource
+    private AccountService accountService;
+    @Resource
     private NotificationService notificationService;
     @Resource
     private ApplicationEventPublisher publisher;
@@ -115,7 +117,7 @@ public class ArticleServiceImpl extends AbstractService<Article> implements Arti
         String reservedTag = checkTags(articleTags);
         boolean notification = false;
         if (StringUtils.isNotBlank(reservedTag)) {
-            boolean isAdmin = userService.hasAdminPermission(user.getEmail());
+            boolean isAdmin = accountService.hasAdminPermission(user.getEmail());
             if (!isAdmin) {
                 throw new UltraViresException(StringEscapeUtils.unescapeJava(reservedTag) + "标签为系统保留标签!");
             } else {
