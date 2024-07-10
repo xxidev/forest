@@ -71,7 +71,7 @@ public class RedisServiceImpl implements RedisService{
                 if (pool == null) {
                     pool = new JedisPool(new JedisPoolConfig(), host,
                             port, connectionTimeout,
-                            soTimeout, password,
+                            soTimeout, password.equals("")?null:password,
                             database, clientName,
                             ssl, sslSocketFactory,
                             sslParameters, hostnameVerifier);
