@@ -3,21 +3,25 @@ package com.rymcu.forest.core.service.redis.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
-import com.rymcu.forest.config.RedisProperties;
 import com.rymcu.forest.core.service.redis.RedisResult;
 import com.rymcu.forest.core.service.redis.RedisService;
+import lombok.Data;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.util.*;
 
@@ -28,15 +32,25 @@ import java.util.*;
  * 16/10/30 下午5:28
  */
 @Component("redisService")
-@EnableConfigurationProperties({RedisProperties.class})
-public class RedisServiceImpl implements RedisService {
+@ConfigurationProperties(prefix = "spring.redis")
+@Data
+public class RedisServiceImpl implements RedisService{
+    private String host = Protocol.DEFAULT_HOST;
+    private int port = Protocol.DEFAULT_PORT;
+    private String password;
+    private int database = 1;
+    private int connectionTimeout = Protocol.DEFAULT_TIMEOUT;
+    private int soTimeout = Protocol.DEFAULT_TIMEOUT;
+    private String clientName;
+    private boolean ssl;
+    private SSLSocketFactory sslSocketFactory;
+    private SSLParameters sslParameters;
+    private HostnameVerifier hostnameVerifier;
 
     private static final Logger logger = LoggerFactory.getLogger(RedisServiceImpl.class);
 
     private static JedisPool pool = null;
 
-    @Resource
-    private RedisProperties redisProperties;
 
 
     /**
@@ -55,12 +69,12 @@ public class RedisServiceImpl implements RedisService {
         if (pool == null) {
             synchronized (RedisServiceImpl.class) {
                 if (pool == null) {
-                    pool = new JedisPool(redisProperties, redisProperties.getHost(),
-                            redisProperties.getPort(), redisProperties.getConnectionTimeout(),
-                            redisProperties.getSoTimeout(), redisProperties.getPassword(),
-                            redisProperties.getDatabase(), redisProperties.getClientName(),
-                            redisProperties.isSsl(), redisProperties.getSslSocketFactory(),
-                            redisProperties.getSslParameters(), redisProperties.getHostnameVerifier());
+                    pool = new JedisPool(new JedisPoolConfig(), host,
+                            port, connectionTimeout,
+                            soTimeout, password,
+                            database, clientName,
+                            ssl, sslSocketFactory,
+                            sslParameters, hostnameVerifier);
                 }
             }
         }

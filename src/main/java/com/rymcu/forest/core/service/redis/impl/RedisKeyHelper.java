@@ -132,7 +132,7 @@ public class RedisKeyHelper {
      * @param key
      * @return
      */
-    public String makeLockKey(Class clazz, String key) {
+    public static String makeLockKey(Class clazz, String key) {
         return buildKeyString(LOCK_PREFIX, clazz.getSimpleName(), key);
     }
 
@@ -143,7 +143,7 @@ public class RedisKeyHelper {
      * @param key
      * @return
      */
-    public String makeLockKey(String key) {
+    public static String makeLockKey(String key) {
         return buildKeyString(LOCK_PREFIX, key);
     }
 
@@ -153,7 +153,7 @@ public class RedisKeyHelper {
      * @param itemId
      * @return
      */
-    public String makeIcItemKey(long itemId) {
+    public static String makeIcItemKey(long itemId) {
         return buildKeyString(IC_ITEM_PREFIX, itemId);
     }
 
@@ -164,7 +164,7 @@ public class RedisKeyHelper {
      * @param pageNo
      * @return
      */
-    public String makeIcItemListKey(int pageSize, int pageNo) {
+    public static String makeIcItemListKey(int pageSize, int pageNo) {
         return buildKeyString(IC_ITEM_LIST_PREFIX, pageSize, pageNo);
     }
 
@@ -174,7 +174,7 @@ public class RedisKeyHelper {
      * @param itemId
      * @return
      */
-    public String makeInvestedAmountKey(long itemId) {
+    public static String makeInvestedAmountKey(long itemId) {
         return buildKeyString(IC_ITEM_INVESTED_AMOUNT_PREFIX, itemId);
     }
 
@@ -184,7 +184,7 @@ public class RedisKeyHelper {
      * @param flag
      * @return
      */
-    public String makeSeqKey(String flag) {
+    public static String makeSeqKey(String flag) {
         return buildKeyString(TC_TRANS_SEQ_PREFIX, flag);
     }
 
