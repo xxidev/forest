@@ -32,117 +32,55 @@ import java.util.Map;
  */
 @RestControllerAdvice
 public class BaseExceptionHandler {
+    Map<Class<? extends Exception>, GlobalResult<ResultCode>> mapper = new HashMap<Class<? extends Exception>, GlobalResult<ResultCode>>();
+
+    {
+        mapper.put(UnauthenticatedException.class, new GlobalResult<>(ResultCode.UNAUTHENTICATED));
+        mapper.put(UnauthorizedException.class, new GlobalResult<>(ResultCode.UNAUTHORIZED));
+        mapper.put(UnknownAccountException.class, new GlobalResult<>(ResultCode.UNKNOWN_ACCOUNT));
+        mapper.put(AccountException.class, new GlobalResult<>(ResultCode.INCORRECT_ACCOUNT_OR_PASSWORD));
+
+        GlobalResult<ResultCode> noHandler = new GlobalResult<>(ResultCode.NOT_FOUND);
+        noHandler.setMessage(ResultCode.NOT_FOUND.getMessage());
+        mapper.put(NoHandlerFoundException.class, noHandler);
+
+        mapper.put(ServletException.class, new GlobalResult<>(ResultCode.FAIL));
+        mapper.put(TransactionException.class, new GlobalResult<>());
+        mapper.put(BusinessException.class, new GlobalResult<>(ResultCode.INVALID_PARAM));
+
+    }
 
     private final Logger logger = LoggerFactory.getLogger(BaseExceptionHandler.class);
 
     @SuppressWarnings("Duplicates")
     @ExceptionHandler(Exception.class)
     public Object errorHandler(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        GlobalResult<ResultCode> res = mapper.computeIfAbsent(ex.getClass(),
+                e -> {
+                    String message;
+                    if (handler instanceof HandlerMethod) {
+                        HandlerMethod handlerMethod = (HandlerMethod) handler;
+                        message = String.format("接口 [%s] 出现异常，方法：%s.%s，异常摘要：%s",
+                                request.getRequestURI(),
+                                handlerMethod.getBean().getClass().getName(),
+                                handlerMethod.getMethod().getName(),
+                                ex.getMessage());
+                    } else {
+                        message = ex.getMessage();
+                    }
+                    logger.error(message, ex);
+                    return new GlobalResult<>(ResultCode.INTERNAL_SERVER_ERROR);
+                });
         if (isAjax(request)) {
-            GlobalResult<ResultCode> result = new GlobalResult<>();
-            if (ex instanceof UnauthenticatedException) {
-                result = new GlobalResult<>(ResultCode.UNAUTHENTICATED);
-                logger.info("token错误");
-            } else if (ex instanceof UnauthorizedException) {
-                result = new GlobalResult<>(ResultCode.UNAUTHORIZED);
-                logger.info("用户无权限");
-            } else if (ex instanceof UnknownAccountException) {
-                // 未知账号
-                result = new GlobalResult<>(ResultCode.UNKNOWN_ACCOUNT);
-                logger.info(ex.getMessage());
-            } else if (ex instanceof AccountException) {
-                // 账号或密码错误
-                result = new GlobalResult<>(ResultCode.INCORRECT_ACCOUNT_OR_PASSWORD);
-                logger.info(ex.getMessage());
-            } else if (ex instanceof ServiceException) {
-                //业务失败的异常，如“账号或密码错误”
-                result.setCode(((ServiceException) ex).getCode());
-                result.setMessage(ex.getMessage());
-                logger.info(ex.getMessage());
-            } else if (ex instanceof NoHandlerFoundException) {
-                result.setCode(ResultCode.NOT_FOUND.getCode());
-                result.setMessage(ResultCode.NOT_FOUND.getMessage());
-            } else if (ex instanceof ServletException) {
-                result.setCode(ResultCode.FAIL.getCode());
-                result.setMessage(ex.getMessage());
-            } else if (ex instanceof TransactionException) {
-                result.setCode(((TransactionException) ex).getCode());
-                result.setMessage(ex.getMessage());
-            } else if (ex instanceof BusinessException) {
-                result.setCode(ResultCode.INVALID_PARAM.getCode());
-                result.setMessage(ex.getMessage());
-            } else {
-                //系统内部异常,不返回给客户端,内部记录错误日志
-                result = new GlobalResult<>(ResultCode.INTERNAL_SERVER_ERROR);
-                String message;
-                if (handler instanceof HandlerMethod) {
-                    HandlerMethod handlerMethod = (HandlerMethod) handler;
-                    message = String.format("接口 [%s] 出现异常，方法：%s.%s，异常摘要：%s",
-                            request.getRequestURI(),
-                            handlerMethod.getBean().getClass().getName(),
-                            handlerMethod.getMethod().getName(),
-                            ex.getMessage());
-                } else {
-                    message = ex.getMessage();
-                }
-                logger.error(message, ex);
-            }
-            result.setSuccess(false);
-            return result;
+            res.setMessage(ex.getMessage());
+            res.setSuccess(false);
+            return res;
         } else {
             ModelAndView mv = new ModelAndView();
             FastJsonView view = new FastJsonView();
             Map<String, Object> attributes = new HashMap(2);
-            if (ex instanceof UnauthenticatedException) {
-                attributes.put("code", ResultCode.UNAUTHENTICATED.getCode());
-                attributes.put("message", ResultCode.UNAUTHENTICATED.getMessage());
-            } else if (ex instanceof UnauthorizedException) {
-                attributes.put("code", ResultCode.UNAUTHORIZED.getCode());
-                attributes.put("message", ResultCode.UNAUTHORIZED.getMessage());
-            } else if (ex instanceof UnknownAccountException) {
-                // 未知账号
-                attributes.put("code", ResultCode.UNKNOWN_ACCOUNT.getCode());
-                attributes.put("message", ex.getMessage());
-                logger.info(ex.getMessage());
-            } else if (ex instanceof AccountException) {
-                // 账号或密码错误
-                attributes.put("code", ResultCode.INCORRECT_ACCOUNT_OR_PASSWORD.getCode());
-                attributes.put("message", ex.getMessage());
-                logger.info(ex.getMessage());
-            } else if (ex instanceof ServiceException) {
-                //业务失败的异常，如“账号或密码错误”
-                attributes.put("code", ((ServiceException) ex).getCode());
-                attributes.put("message", ex.getMessage());
-                logger.info(ex.getMessage());
-            } else if (ex instanceof NoHandlerFoundException) {
-                attributes.put("code", ResultCode.NOT_FOUND.getCode());
-                attributes.put("message", ResultCode.NOT_FOUND.getMessage());
-            } else if (ex instanceof ServletException) {
-                attributes.put("code", ResultCode.FAIL.getCode());
-                attributes.put("message", ex.getMessage());
-            } else if (ex instanceof TransactionException) {
-                attributes.put("code", ((TransactionException) ex).getCode());
-                attributes.put("message", ex.getMessage());
-            } else if (ex instanceof BusinessException) {
-                attributes.put("code", ResultCode.INVALID_PARAM.getCode());
-                attributes.put("message", ex.getMessage());
-            } else {
-                //系统内部异常,不返回给客户端,内部记录错误日志
-                attributes.put("code", ResultCode.INTERNAL_SERVER_ERROR.getCode());
-                String message;
-                if (handler instanceof HandlerMethod) {
-                    HandlerMethod handlerMethod = (HandlerMethod) handler;
-                    message = String.format("接口 [%s] 出现异常，方法：%s.%s，异常摘要：%s",
-                            request.getRequestURI(),
-                            handlerMethod.getBean().getClass().getName(),
-                            handlerMethod.getMethod().getName(),
-                            ex.getMessage());
-                } else {
-                    message = ex.getMessage();
-                }
-                logger.error(message, ex);
-                attributes.put("message", ResultCode.INTERNAL_SERVER_ERROR.getMessage());
-            }
+            attributes.put("code", res.getCode());
+            attributes.put("message", res.getMessage());
             attributes.put("success", false);
             view.setAttributesMap(attributes);
             mv.setView(view);

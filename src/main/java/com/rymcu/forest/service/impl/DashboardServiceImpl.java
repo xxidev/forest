@@ -125,92 +125,10 @@ public class DashboardServiceImpl implements DashboardService {
         while (now.getYear() >= localDate.getYear()) {
             if (now.getYear() == localDate.getYear()) {
                 if (now.getMonthValue() > localDate.getMonthValue()) {
-                    String date = localDate.getYear() + "-" + (localDate.getMonthValue() < 10 ? "0" + localDate.getMonthValue() : localDate.getMonthValue());
-                    dates.add(date);
-
-                    articles.forEach(article -> {
-                        if (date.equals(article.getLabel())) {
-                            articleData.add(article.getValue());
-                            return;
-                        }
-                    });
-                    if (articleData.size() < dates.size()) {
-                        articleData.add(0);
-                    }
-
-                    users.forEach(user -> {
-                        if (date.equals(user.getLabel())) {
-                            userData.add(user.getValue());
-                            return;
-                        }
-                    });
-                    if (userData.size() < dates.size()) {
-                        userData.add(0);
-                    }
-
-                    visits.forEach(visit -> {
-                        if (date.equals(visit.getLabel())) {
-                            visitData.add(visit.getValue());
-                            return;
-                        }
-                    });
-                    if (visitData.size() < dates.size()) {
-                        visitData.add(0);
-                    }
-
-                    visitIps.forEach(visitIp -> {
-                        if (date.equals(visitIp.getLabel())) {
-                            visitIpData.add(visitIp.getValue());
-                            return;
-                        }
-                    });
-                    if (visitIpData.size() < dates.size()) {
-                        visitIpData.add(0);
-                    }
+                    process(dates, articleData, userData, visitData, visitIpData, articles, users, visits, visitIps, localDate);
                 }
             } else {
-                String date = localDate.getYear() + "-" + (localDate.getMonthValue() < 10 ? "0" + localDate.getMonthValue() : localDate.getMonthValue());
-                dates.add(date);
-
-                articles.forEach(article -> {
-                    if (date.equals(article.getLabel())) {
-                        articleData.add(article.getValue());
-                        return;
-                    }
-                });
-                if (articleData.size() < dates.size()) {
-                    articleData.add(0);
-                }
-
-                users.forEach(user -> {
-                    if (date.equals(user.getLabel())) {
-                        userData.add(user.getValue());
-                        return;
-                    }
-                });
-                if (userData.size() < dates.size()) {
-                    userData.add(0);
-                }
-
-                visits.forEach(visit -> {
-                    if (date.equals(visit.getLabel())) {
-                        visitData.add(visit.getValue());
-                        return;
-                    }
-                });
-                if (visitData.size() < dates.size()) {
-                    visitData.add(0);
-                }
-
-                visitIps.forEach(visitIp -> {
-                    if (date.equals(visitIp.getLabel())) {
-                        visitIpData.add(visitIp.getValue());
-                        return;
-                    }
-                });
-                if (visitIpData.size() < dates.size()) {
-                    visitIpData.add(0);
-                }
+                process(dates, articleData, userData, visitData, visitIpData, articles, users, visits, visitIps, localDate);
             }
 
             localDate = localDate.plusMonths(1);
@@ -221,6 +139,51 @@ public class DashboardServiceImpl implements DashboardService {
         map.put("visits", visitData);
         map.put("visitIps", visitIpData);
         return map;
+    }
+
+    private void process(ArrayList<String> dates, ArrayList<Integer> articleData, ArrayList<Integer> userData, ArrayList<Integer> visitData, ArrayList<Integer> visitIpData, List<DashboardData> articles, List<DashboardData> users, List<DashboardData> visits, List<DashboardData> visitIps, LocalDate localDate) {
+        String date = localDate.getYear() + "-" + (localDate.getMonthValue() < 10 ? "0" + localDate.getMonthValue() : localDate.getMonthValue());
+        dates.add(date);
+
+        articles.forEach(article -> {
+            if (date.equals(article.getLabel())) {
+                articleData.add(article.getValue());
+                return;
+            }
+        });
+        if (articleData.size() < dates.size()) {
+            articleData.add(0);
+        }
+
+        users.forEach(user -> {
+            if (date.equals(user.getLabel())) {
+                userData.add(user.getValue());
+                return;
+            }
+        });
+        if (userData.size() < dates.size()) {
+            userData.add(0);
+        }
+
+        visits.forEach(visit -> {
+            if (date.equals(visit.getLabel())) {
+                visitData.add(visit.getValue());
+                return;
+            }
+        });
+        if (visitData.size() < dates.size()) {
+            visitData.add(0);
+        }
+
+        visitIps.forEach(visitIp -> {
+            if (date.equals(visitIp.getLabel())) {
+                visitIpData.add(visitIp.getValue());
+                return;
+            }
+        });
+        if (visitIpData.size() < dates.size()) {
+            visitIpData.add(0);
+        }
     }
 
     @Override
